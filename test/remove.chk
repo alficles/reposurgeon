@@ -17793,7 +17793,6 @@ committer Eric S. Raymond <esr@thyrsus.com> 1290997985 -0500
 data 42
 Be explicit about releasing to freshmeat.
 from :135
-M 100644 :136 bs.spec
 
 reset refs/heads/master
 from :137

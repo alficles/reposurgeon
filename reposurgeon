@@ -9006,9 +9006,9 @@ From a specified commit, remove a specified fileop. The syntax is:
 
      remove OP [to COMMIT]
 
-The OP must be one of (a) the keyword 'deletes', (b) a file path, or
-(c) a 1-origin numeric index.  The 'deletes' keyword selects all D
-fileops in the commit; the others select one each.
+The OP must be one of (a) one of the the keywords 'all' or 'deletes', (b) a
+file path, or (c) a 1-origin numeric index.  The 'all' keyword selects all
+fileops; 'deletes' selects D fileops in the commit; the others select one each.
 
 If the to clause is present, the removed op is appended to the
 commit specified by the following singleton selection set.  This option
@@ -9028,6 +9028,9 @@ change in a future release.
         (opindex, line) = RepoSurgeon.pop_token(line)
         for _, event in self.selected(Commit):
             event.invalidate_pathset_cache()
+            if opindex == b"all":
+                event.fileops = []
+                return
             if opindex == b"deletes":
                 event.fileops = [e for e in event.fileops if e.op != "D"]
                 return
