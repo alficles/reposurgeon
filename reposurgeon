@@ -9030,39 +9030,38 @@ change in a future release.
             event.invalidate_pathset_cache()
             if opindex == b"all":
                 event.fileops = []
-                return
-            if opindex == b"deletes":
+            elif opindex == b"deletes":
                 event.fileops = [e for e in event.fileops if e.op != "D"]
-                return
-            for (ind, op) in enumerate(event.fileops):
-                if hasattr(op, "path") and getattr(op, "path") == opindex:
-                    break
-                if hasattr(op, "source") and getattr(op, "source") == opindex:
-                    break
-                if hasattr(op, "target") and getattr(op, "target") == opindex:
-                    break
             else:
+                for (ind, op) in enumerate(event.fileops):
+                    if hasattr(op, "path") and getattr(op, "path") == opindex:
+                        break
+                    if hasattr(op, "source") and getattr(op, "source") == opindex:
+                        break
+                    if hasattr(op, "target") and getattr(op, "target") == opindex:
+                        break
+                else:
+                    try:
+                        ind = int(opindex) - 1
+                    except (ValueError, IndexError):
+                        complain(b"invalid or missing fileop specification %s" % opindex)
+                        return
+                target = None
+                if line:
+                    (verb, line)  = RepoSurgeon.pop_token(line)
+                    if verb == b'to':
+                        self.set_selection_set(line)
+                        if len(self.selection) != 1:
+                            raise Recoverable(b"remove to requires a singleton selection")
+                        target = self.selection[0]
                 try:
-                    ind = int(opindex) - 1
-                except (ValueError, IndexError):
-                    complain(b"invalid or missing fileop specification %s" % opindex)
+                    removed = event.fileops.pop(ind)
+                    if target:
+                        self.chosen().events[target].fileops.append(removed)
+                    # FIXME: Scavenge blobs left with no references
+                except IndexError:
+                    complain(b"out-of-range fileop index %s" % ind)
                     return
-            target = None
-            if line:
-                (verb, line)  = RepoSurgeon.pop_token(line)
-                if verb == b'to':
-                    self.set_selection_set(line)
-                    if len(self.selection) != 1:
-                        raise Recoverable(b"remove to requires a singleton selection")
-                    target = self.selection[0]
-            try:
-                removed = event.fileops.pop(ind)
-                if target:
-                    self.chosen().events[target].fileops.append(removed)
-                # FIXME: Scavenge blobs left with no references
-            except IndexError:
-                complain(b"out-of-range fileop index %s" % ind)
-                return
 
     def help_renumber(self):
         print(b"""
