@@ -8584,7 +8584,8 @@ that reference the blob.
 With --shell, the remainder of the line specifies a filter as a
 shell command. Each blob or comment is presented to the filter on
 standard input; the content is replaced with whatever the filter emits
-to standard output.
+to standard output. If non-blobs are being filtered, one or more of --comments,
+--authors, or --committers should be specified directly after --shell as well.
 
 With --regex, the remainder of the line is expected to be a Python
 regular expression substitution written as /from/to/ with 'from' and
@@ -8625,6 +8626,19 @@ With --dedos, DOS/Windows-style \r\n line terminators are replaced with \n.
                 # in shell commands.
                 if filtercmd.startswith(b'--shell'):
                     self.filtercmd = filtercmd[7:].lstrip()
+
+                    while 1:
+                        if self.filtercmd.startswith(b'--comments'):
+                            self.attributes.add(b'c')
+                            self.filtercmd = self.filtercmd[10:].lstrip()
+                        elif self.filtercmd.startswith(b'--authors'):
+                            self.attributes.add(b'a')
+                            self.filtercmd = self.filtercmd[9:].lstrip()
+                        elif self.filtercmd.startswith(b'--committers'):
+                            self.attributes.add(b'C')
+                            self.filtercmd = self.filtercmd[12:].lstrip()
+                        else:
+                            break
                 elif filtercmd.startswith(b'--regex') or filtercmd.startswith(b'--replace'):
                     firstspace = filtercmd.find(b' ')
                     if firstspace == -1:
