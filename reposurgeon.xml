@@ -1399,7 +1399,7 @@ the new text is appended.</para>
 </varlistentry>
 <varlistentry>
 <term><command>filter</command>
-        [<emphasis>--shell</emphasis>|<emphasis>--regex</emphasis>|<emphasis>--replace</emphasis>|<emphasis>--dedos</emphasis>]
+	[<emphasis>--shell</emphasis> [<emphasis>--comments</emphasis>] [<emphasis>--authors</emphasis>] [<emphasis>--committers</emphasis>] |<emphasis>--regex</emphasis>|<emphasis>--replace</emphasis>|<emphasis>--dedos</emphasis>]
 </term>
 <listitem>
 <para>Run blobs, commit comments, or tag comments in the selection set
@@ -1415,11 +1415,13 @@ bounded by the earliest and latest blob in the specification.</para>
 '%PATHS%' it is replaced with a space-separated list of all paths
 that reference the blob.</para>
 
-<para>With --shell, the remainder of the line specifies a filter as a
-shell command. Each blob or comment is presented to the filter on
-standard input; the content is replaced with whatever the filter emits
-to standard output. At present --shell is required. Other filtering
-modes will be supported in the future.</para>
+<para>With --shell, the remainder of the line specifies a filter as a shell
+command. Each blob or comment is presented to the filter on standard
+input; the content is replaced with whatever the filter emits to
+standard output. If non-blobs are being filtered, one or more of
+--comments, --authors, or --committers should be specified directly
+after --shell as well. Other filtering modes will be supported in the
+future.</para>
 
 <para>With --regex, the remainder of the line is expected to be a Python
 regular expression substitution written as /from/to/ with from and
