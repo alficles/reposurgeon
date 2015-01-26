@@ -9739,14 +9739,23 @@ modified as a result.
         print(b"""
 Rename or delete a branch (and any associated resets).  First argument
 must be an existing branch name; second argument must one of the verbs
-'rename' or 'delete'.
+'rename', 'forcerename' or 'delete'.
 
 For a 'rename', the third argument may be any token that is a syntactically
-valid branch name (but not the name of an existing branch). For a 'delete',
-no third argument is required.
+valid branch name (but not the name of an existing branch). For a
+'delete', no third argument is required.
+
+'forcerename' is the same as 'rename', but allows an existing branch name to be
+specified. Use this with caution, since it is very easy to produce inconsistant
+branches. If you use 'forcerename', or provide a selection set to 'rename', it
+is your responsibility to ensure that the resultant tree contains properly
+specified branches.
 
 For either name, if it does not contain a '/' the prefix 'heads/'
 is prepended. If it does not begin with 'refs/', 'refs/' is prepended.
+
+If a selection set is provided, only those commits and resets that match
+will be renamed.
 """)
     def do_branch(self, line):
         "Rename a branch or delete it."
@@ -9760,16 +9769,18 @@ is prepended. If it does not begin with 'refs/', 'refs/' is prepended.
         if branchname not in repo.branchset():
             raise Recoverable(b"no such branch as %s" % branchname)
         (verb, line) = RepoSurgeon.pop_token(line)
-        if verb == "rename":
+        if verb == "rename" or "forcerename":
+            if self.selection == None:
+                self.selection = repo.all()
             (newname, line) = RepoSurgeon.pop_token(line)
             if not newname:
                 raise Recoverable(b"new branch name must be nonempty.")
             if not "/" in newname:
                 newname = 'refs/heads/' + newname
-            if newname in repo.branchset():
+            if newname in repo.branchset() and not verb == "forcerename":
                 raise Recoverable(b"there is already a branch named '%s'." \
                                   % newname)
-            for event in repo:
+            for _, event in self.selected():
                 if isinstance(event, Commit):
                     if event.branch == branchname:
                         event.set_branch(newname)
@@ -9777,6 +9788,8 @@ is prepended. If it does not begin with 'refs/', 'refs/' is prepended.
                     if event.ref == branchname:
                         event.ref = newname
         elif verb == "delete":
+            if self.selection:
+                raise Recoverable(b"branch delete cannot accept a selection set.")
             repo.delete([i for i in range(len(repo.events)) if
                          (isinstance(repo.events[i], Reset) and repo.events[i].ref == branchname) \
                          or \
