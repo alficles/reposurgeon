@@ -217,7 +217,7 @@ bzr-orphans
     # Export is tested and works; import is flaky.
     VCS(name=b"hg",
         subdirectory=b".hg",
-        exporter=b"hg-fast-export.py --marks /dev/null --mapping /dev/null --heads /dev/null --status /dev/null --repo .",
+        exporter=b"hg-fast-export.py --marks /dev/null --mapping /dev/null --heads /dev/null --status /dev/null --force --repo .",
         styleflags={b"import-defaults", b"nl-after-comment", b"export-progress"},
         properties=False,
         initializer=b"hg init",
